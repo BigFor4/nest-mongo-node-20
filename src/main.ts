@@ -15,7 +15,7 @@ import { AppModule } from './app.module';
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
     const configSerice = app.get(ConfigService);
-    const port = +configSerice.get<number>('PORT') || 5174;
+    const port = +configSerice.get<number>('PORT') || 3306;
     const host = +configSerice.get<number>('HOST') || 'http://localhost';
     const httpAdapterHost = app.get(HttpAdapterHost);
 
