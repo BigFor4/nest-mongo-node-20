@@ -7,7 +7,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UserService {
-    constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) { }
+    constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
     async create(createUserDto: CreateUserDto): Promise<User> {
         const createdUser = new this.userModel(createUserDto);
@@ -25,7 +25,9 @@ export class UserService {
     }
 
     async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
-        const updatedUser = await this.userModel.findByIdAndUpdate(id, updateUserDto, { new: true }).exec();
+        const updatedUser = await this.userModel
+            .findByIdAndUpdate(id, updateUserDto, { new: true })
+            .exec();
         if (!updatedUser) throw new NotFoundException('User not found');
         return updatedUser;
     }

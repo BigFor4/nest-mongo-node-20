@@ -9,10 +9,10 @@ import { UserModule } from '@modules/user/user.module';
             envFilePath: '.env',
             isGlobal: true,
         }),
-        DatabaseModule, 
+        DatabaseModule,
         UserModule,
     ],
     controllers: [],
     providers: [],
 })
-export class AppModule { }
+export class AppModule {}
