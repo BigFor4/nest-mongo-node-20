@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from '@configs/database.module';
 import { UserModule } from '@modules/user/user.module';
+import { XmlModule } from '@modules/xml/xml.module';
 
 @Module({
     imports: [
@@ -11,6 +12,7 @@ import { UserModule } from '@modules/user/user.module';
         }),
         DatabaseModule,
         UserModule,
+        XmlModule,
     ],
     controllers: [],
     providers: [],
