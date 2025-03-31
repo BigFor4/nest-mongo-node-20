@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from '@configs/database.module';
-import { UserModule } from '@modules/user/user.module';
+import { ClassificationModule } from '@modules/classification/classification.module';
 import { XmlModule } from '@modules/xml/xml.module';
 
 @Module({
@@ -11,7 +11,7 @@ import { XmlModule } from '@modules/xml/xml.module';
             isGlobal: true,
         }),
         DatabaseModule,
-        UserModule,
+        ClassificationModule,
         XmlModule,
     ],
     controllers: [],

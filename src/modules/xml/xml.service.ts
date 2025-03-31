@@ -1,6 +1,32 @@
 import { Injectable } from '@nestjs/common';
 import { XMLParser } from 'fast-xml-parser';
-
+const keyConvert = {
+    Root: 'Root',
+    'Qualifier root': 'Root',
+    Context1: 'English',
+    Denmark: 'Denmark',
+    Finland: 'Finland',
+    Germany: 'Germany',
+    GL: 'Root',
+    Global: 'Root',
+    Norway: 'Norway',
+    Sweden: 'Sweden',
+    da: 'Denmark',
+    'en-US': 'English',
+    fi: 'Finland',
+    de: 'Germany',
+    'std.lang.all': 'Root',
+    no: 'Norway',
+    sv: 'Sweden',
+    AllCountries: 'Root',
+    DA: 'Denmark',
+    FI: 'Finland',
+    DE: 'Germany',
+    NOR: 'Norway',
+    SE: 'Sweden',
+    US: 'English',
+    UK: 'English',
+};
 @Injectable()
 export class XmlService {
     async parseXml(xmlData: string): Promise<any> {
@@ -9,38 +35,136 @@ export class XmlService {
             ignoreAttributes: false,
             attributeNamePrefix: '',
             textNodeName: 'DamText',
+            trimValues: true,
         });
         const parsedData = parser.parse(xmlData);
         const assetsArray = parsedData['STEP-ProductInformation']['Assets']['Asset'];
+        const classificationArray =
+            parsedData['STEP-ProductInformation']['Classifications']['Classification'];
+        const assets = this.transformAssets(assetsArray);
+        const classifications = this.transformClassification(classificationArray);
         return {
             success: true,
-            data: this.transformAssets(assetsArray),
+            assets,
+            classifications,
         };
+    }
+
+    private transformClassification(assetArray: any[]): any[] {
+        return assetArray.map((asset) => {
+            let allTextRow = '';
+            const _id = asset['ID'] || '';
+            const user_type = asset['UserTypeID'] || '';
+            allTextRow = allTextRow + ' ' + _id;
+            const initParams = {
+                _id: asset['ID'] || '',
+                name: [],
+                parent_id: asset['UserTypeID'] || '',
+                referenced: asset['Referenced'],
+                user_type,
+                allTextRow: '',
+                attribute_link: [],
+                metadata: [],
+            };
+            if (asset?.['Name']) {
+                if (!Array.isArray(asset['Name'])) {
+                    asset['Name'] = [asset['Name']];
+                }
+                initParams.name = asset['Name'].map((value) => {
+                    const textValue = value['DamText'] || '';
+                    allTextRow = allTextRow + ' ' + textValue;
+                    return {
+                        [keyConvert[value['QualifierID']]]: textValue,
+                    };
+                });
+            }
+            if (asset?.['AttributeLink']) {
+                if (!Array.isArray(asset['AttributeLink'])) {
+                    asset['AttributeLink'] = [asset['AttributeLink']];
+                }
+                initParams.attribute_link = asset['AttributeLink'].map((value) => {
+                    const textValue = value['AttributeID'] || '';
+                    return textValue;
+                });
+            }
+            if (asset?.['MetaData']) {
+                if (!Array.isArray(asset['MetaData']['MultiValue'])) {
+                    asset['MetaData']['MultiValue'] = [asset['MetaData']['MultiValue']];
+                }
+            }
+            initParams.allTextRow = allTextRow;
+            return initParams;
+        });
     }
 
     private transformAssets(assetArray: any[]): any[] {
         return assetArray.map((asset) => {
+            let allTextRow = '';
+            const _id = asset['ID'] || '';
+            const name = asset['Name']?.text || '';
+            const objectTypeID = asset['UserTypeID'] || '';
+            allTextRow = allTextRow + ' ' + _id + ' ' + name + ' ' + objectTypeID;
             const initParams = {
-                _id: asset['ID'] || '',
-                name: asset['Name']?.text || '',
-                objectTypeID: asset['UserTypeID'] || '',
+                _id,
+                name,
+                objectTypeID,
+                allTextRow,
+                classification: [],
             };
-            if (asset?.['Values']?.['Value']?.length > 0) {
+            if (!asset?.['ClassificationReference']) {
+                asset['ClassificationReference'] = [];
+            } else if (!Array.isArray(asset['ClassificationReference'])) {
+                asset['ClassificationReference'] = [asset['ClassificationReference']];
+            }
+            const classification = asset['ClassificationReference'].map((value) => {
+                const textValue = value['ClassificationID'] || '';
+                return textValue;
+            });
+            initParams.classification = classification || [];
+            if (asset?.['Values']?.['Value']) {
+                if (!Array.isArray(asset['Values']['Value'])) {
+                    asset['Values']['Value'] = [asset['Values']['Value']];
+                }
                 asset['Values']['Value'].map((value) => {
-                    initParams[value['AttributeID']] = value['DamText'] || '';
+                    const textValue = value['DamText'] || '';
+                    allTextRow = allTextRow + ' ' + textValue;
+                    initParams[value['AttributeID']] = textValue;
                 });
             }
-            if (asset?.['Values']?.['ValueGroup']?.length > 0) {
+            if (asset?.['Values']?.['ValueGroup']) {
+                if (!Array.isArray(asset['Values']['ValueGroup'])) {
+                    asset['Values']['ValueGroup'] = [asset['Values']['ValueGroup']];
+                }
                 asset['Values']['ValueGroup'].map((group) => {
                     if (group?.['Value']?.length > 0) {
                         initParams[group['AttributeID']] = group['Value'].map((value) => {
+                            const textValue = value['DamText'] || '';
+                            allTextRow = allTextRow + ' ' + textValue;
                             return {
-                                [value['DerivedContextID']]: value['DamText'] || '',
+                                [keyConvert[value['DerivedContextID'] || value['QualifierID']]]:
+                                    textValue,
                             };
                         });
                     }
                 });
             }
+            if (asset?.['Values']?.['MultiValue']) {
+                if (!Array.isArray(asset['Values']['MultiValue'])) {
+                    asset['Values']['MultiValue'] = [asset['Values']['MultiValue']];
+                }
+                asset['Values']['MultiValue'].map((group) => {
+                    if (group?.['Value']?.length > 0) {
+                        initParams[group['AttributeID']] = group['Value'].map((value) => {
+                            const textValue = value['DamText'] || '';
+                            allTextRow = allTextRow + ' ' + textValue;
+                            return {
+                                [keyConvert[value['QualifierID']]]: textValue,
+                            };
+                        });
+                    }
+                });
+            }
+            initParams.allTextRow = allTextRow;
             return initParams;
         });
     }

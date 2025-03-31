@@ -6,9 +6,9 @@ import { XmlService } from './xml.service';
 export class XmlController {
     constructor(private readonly xmlService: XmlService) {}
 
-    @Post('uploadXmlFile')
+    @Post('parseXml')
     @UseInterceptors(FileInterceptor('file'))
-    async uploadXmlFile(@UploadedFile() file: Express.Multer.File) {
+    async parseXml(@UploadedFile() file: Express.Multer.File) {
         try {
             const xmlContent = file.buffer.toString('utf-8');
             const jsonData = await this.xmlService.parseXml(xmlContent);
