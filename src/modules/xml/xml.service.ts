@@ -61,11 +61,9 @@ export class XmlService {
         }
         return arrayData.reduce((acc, product) => {
             const _id = product['ID'] || '';
-            const name = product['Name'] || '';
-            let allTextRow = _id + ' ' + name;
+            let allTextRow = _id;
             const item = {
                 _id,
-                name,
                 parentId: product['ParentID'] || parentId || '',
                 userTypeID: product['UserTypeID'] || '',
                 assetCrossReference: [],
