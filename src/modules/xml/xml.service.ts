@@ -66,7 +66,7 @@ export class XmlService {
             const item = {
                 _id,
                 name,
-                parentId: parentId || product['ParentID'] || '',
+                parentId: product['ParentID'] || parentId || '',
                 userTypeID: product['UserTypeID'] || '',
                 assetCrossReference: [],
             };
