@@ -33,7 +33,7 @@ import { Asset, AssetSchema } from './schemas/asset.schema';
                     const collectionName =
                         configService.get<string>('COLLECTION_NAME_ASSET') || 'assets';
                     const schema = AssetSchema;
-                    schema.set('collection', collectionName); // Đặt tên collection từ biến môi trường
+                    schema.set('collection', collectionName);
                     return schema;
                 },
                 inject: [ConfigService],
