@@ -90,7 +90,7 @@ export class XmlService {
                         : [];
                 }
                 product['Values']['Value'].map((value) => {
-                    const textValue = value['DamText'] || '';
+                    const textValue = value?.['DamText'] || '';
                     allTextRow = allTextRow + ' ' + textValue;
                     item[value['AttributeID']] = textValue;
                 });
@@ -123,7 +123,7 @@ export class XmlService {
                     asset['Name'] = asset['Name'] ? [asset['Name']] : [];
                 }
                 asset['Name'].map((value) => {
-                    const textValue = value['DamText'] || '';
+                    const textValue = value?.['DamText'] || '';
                     allTextRow = allTextRow + ' ' + textValue;
                     const key = keyConvert[value['QualifierID']] || 'Root';
                     initParams.name = {
@@ -157,7 +157,7 @@ export class XmlService {
                     multiValue['ValueGroup'].map((group) => {
                         if (group?.['Value']?.length > 0) {
                             group['Value'].map((value) => {
-                                const textValue = value['DamText'] || '';
+                                const textValue = value?.['DamText'] || '';
                                 allTextRow = allTextRow + ' ' + textValue;
                                 if (
                                     metadata[
@@ -187,7 +187,7 @@ export class XmlService {
         return arrayData.map((asset) => {
             let allTextRow = '';
             const _id = asset['ID'] || '';
-            const name = asset['Name']['DamText'] || '';
+            const name = asset['Name']?.['DamText'] || '';
             const objectTypeID = asset['UserTypeID'] || '';
             allTextRow = allTextRow + ' ' + _id + ' ' + name + ' ' + objectTypeID;
             const initParams = {
@@ -214,7 +214,7 @@ export class XmlService {
                         : [];
                 }
                 asset['Values']['Value'].map((value) => {
-                    const textValue = value['DamText'] || '';
+                    const textValue = value?.['DamText'] || '';
                     allTextRow = allTextRow + ' ' + textValue;
                     initParams[value['AttributeID']] = textValue;
                 });
@@ -231,7 +231,7 @@ export class XmlService {
                             initParams[group['AttributeID']] = {};
                         }
                         group['Value'].map((value) => {
-                            const textValue = value['DamText'] || '';
+                            const textValue = value?.['DamText'] || '';
                             allTextRow = allTextRow + ' ' + textValue;
                             initParams[group['AttributeID']] = {
                                 ...initParams[group['AttributeID']],
@@ -251,7 +251,7 @@ export class XmlService {
                 asset['Values']['MultiValue'].map((group) => {
                     if (group?.['Value']?.length > 0) {
                         initParams[group['AttributeID']] = group['Value'].map((value) => {
-                            const textValue = value['DamText'] || '';
+                            const textValue = value?.['DamText'] || '';
                             allTextRow = allTextRow + ' ' + textValue;
                             return textValue;
                         });
