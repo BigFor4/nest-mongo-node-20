@@ -100,6 +100,9 @@ export class Asset {
 
     @Prop({ type: String })
     allTextRow: string;
+
+    @Prop({ type: Object })
+    allTextRowLanguage?: object;
 }
 
 export const AssetSchema = SchemaFactory.createForClass(Asset);

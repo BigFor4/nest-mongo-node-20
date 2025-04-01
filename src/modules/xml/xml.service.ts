@@ -6,24 +6,24 @@ import { InjectModel } from '@nestjs/mongoose';
 import { XMLParser } from 'fast-xml-parser';
 import { Model } from 'mongoose';
 const keyConvert = {
-    Root: 'Root',
-    'Qualifier root': 'Root',
+    Root: 'English',
+    'Qualifier root': 'English',
     Context1: 'English',
     Denmark: 'Denmark',
     Finland: 'Finland',
     Germany: 'Germany',
-    GL: 'Root',
-    Global: 'Root',
+    GL: 'English',
+    Global: 'English',
     Norway: 'Norway',
     Sweden: 'Sweden',
     da: 'Denmark',
     'en-US': 'English',
     fi: 'Finland',
     de: 'Germany',
-    'std.lang.all': 'Root',
+    'std.lang.all': 'English',
     no: 'Norway',
     sv: 'Sweden',
-    AllCountries: 'Root',
+    AllCountries: 'English',
     DA: 'Denmark',
     FI: 'Finland',
     DE: 'Germany',
@@ -113,7 +113,8 @@ export class XmlService {
         return arrayData.reduce((acc, product) => {
             const _id = product['ID'] || '';
             const name = product['Name']?.['DamText'] || '';
-            let allTextRow = _id + ' ' + name;
+            const initTextKey = _id + ' ' + name;
+            let allTextRow = initTextKey;
             const item = {
                 _id,
                 name,
@@ -121,6 +122,9 @@ export class XmlService {
                 userTypeID: product['UserTypeID'] || '',
                 assetCrossReference: [],
                 allTextRow: '',
+                allTextRowLanguage: {
+                    English: initTextKey,
+                },
             };
             const assetCrossReference = [];
             if (!Array.isArray(product['AssetCrossReference'])) {
@@ -148,6 +152,7 @@ export class XmlService {
                 });
             }
             item.allTextRow = allTextRow;
+            item.allTextRowLanguage.English = allTextRow;
             acc.push(item);
             if (product['Product']) {
                 acc = acc.concat(this.transformProduct(product['Product'], product['ID']));
@@ -158,11 +163,14 @@ export class XmlService {
 
     private transformClassification(arrayData: any[]): any[] {
         return arrayData.map((asset) => {
-            let allTextRow = '';
             const _id = asset['ID'] || '';
-            allTextRow = allTextRow + ' ' + _id;
+            const initTextKey = _id;
+            let allTextRow = initTextKey;
+            const allTextRowLanguage = {
+                English: allTextRow,
+            };
             const initParams = {
-                _id: asset['ID'] || '',
+                _id,
                 name: {},
                 parentId: asset['ParentID'] || '',
                 userTypeID: asset['UserTypeID'] || '',
@@ -170,6 +178,9 @@ export class XmlService {
                 allTextRow: '',
                 attributeLink: [],
                 metadata: {},
+                allTextRowLanguage: {
+                    English: '',
+                },
             };
             if (asset?.['Name']) {
                 if (!Array.isArray(asset['Name'])) {
@@ -178,7 +189,9 @@ export class XmlService {
                 asset['Name'].map((value) => {
                     const textValue = value?.['DamText'] || '';
                     allTextRow = allTextRow + ' ' + textValue;
-                    const key = keyConvert[value['QualifierID']] || 'Root';
+                    const key = keyConvert[value['QualifierID']] || 'English';
+                    allTextRowLanguage[key] =
+                        (allTextRowLanguage[key] || initTextKey) + ' ' + textValue;
                     initParams.name = {
                         ...initParams.name,
                         [key]: textValue,
@@ -212,18 +225,14 @@ export class XmlService {
                             group['Value'].map((value) => {
                                 const textValue = value?.['DamText'] || '';
                                 allTextRow = allTextRow + ' ' + textValue;
-                                if (
-                                    metadata[
-                                        keyConvert[value['QualifierID'] || value['QualifierID']]
-                                    ]
-                                ) {
-                                    metadata[
-                                        keyConvert[value['QualifierID'] || value['QualifierID']]
-                                    ].push(textValue);
+                                const key =
+                                    keyConvert[value['QualifierID'] || value['QualifierID']];
+                                allTextRowLanguage[key] =
+                                    (allTextRowLanguage[key] || initTextKey) + ' ' + textValue;
+                                if (metadata[key]) {
+                                    metadata[key].push(textValue);
                                 } else {
-                                    metadata[
-                                        keyConvert[value['QualifierID'] || value['QualifierID']]
-                                    ] = [textValue];
+                                    metadata[key] = [textValue];
                                 }
                             });
                         }
@@ -232,17 +241,21 @@ export class XmlService {
                 initParams.metadata = metadata;
             }
             initParams.allTextRow = allTextRow;
+            initParams.allTextRowLanguage = allTextRowLanguage;
             return initParams;
         });
     }
 
     private transformAssets(assetsArray: any[], arrayClassifications: any[]): any[] {
         return assetsArray.map((asset) => {
-            let allTextRow = '';
             const _id = asset['ID'] || '';
             const name = asset['Name']?.['DamText'] || '';
             const objectTypeID = asset['UserTypeID'] || '';
-            allTextRow = allTextRow + ' ' + _id + ' ' + name + ' ' + objectTypeID;
+            let initTextKey = _id + ' ' + name + ' ' + objectTypeID;
+            let allTextRow = initTextKey;
+            const allTextRowLanguage = {
+                English: allTextRow,
+            };
             const initParams = {
                 _id,
                 name,
@@ -250,6 +263,9 @@ export class XmlService {
                 allTextRow,
                 classifications: [],
                 classificationFolders: [],
+                allTextRowLanguage: {
+                    English: '',
+                },
             };
             if (!Array.isArray(asset['ClassificationReference'])) {
                 asset['ClassificationReference'] = asset['ClassificationReference']
@@ -283,6 +299,8 @@ export class XmlService {
                 asset['Values']['Value'].map((value) => {
                     const textValue = value?.['DamText'] || '';
                     allTextRow = allTextRow + ' ' + textValue;
+                    initTextKey = initTextKey + ' ' + textValue;
+                    allTextRowLanguage['English'] = allTextRowLanguage['English'] + ' ' + textValue;
                     initParams[value['AttributeID']] = textValue;
                 });
             }
@@ -300,10 +318,13 @@ export class XmlService {
                         group['Value'].map((value) => {
                             const textValue = value?.['DamText'] || '';
                             allTextRow = allTextRow + ' ' + textValue;
+                            const key =
+                                keyConvert[value['DerivedContextID'] || value['QualifierID']];
+                            allTextRowLanguage[key] =
+                                (allTextRowLanguage[key] || initTextKey) + ' ' + textValue;
                             initParams[group['AttributeID']] = {
                                 ...initParams[group['AttributeID']],
-                                [keyConvert[value['DerivedContextID'] || value['QualifierID']]]:
-                                    textValue,
+                                [key]: textValue,
                             };
                         });
                     }
@@ -320,12 +341,15 @@ export class XmlService {
                         initParams[group['AttributeID']] = group['Value'].map((value) => {
                             const textValue = value?.['DamText'] || '';
                             allTextRow = allTextRow + ' ' + textValue;
+                            allTextRowLanguage['English'] =
+                                allTextRowLanguage['English'] + ' ' + textValue;
                             return textValue;
                         });
                     }
                 });
             }
             initParams.allTextRow = allTextRow;
+            initParams.allTextRowLanguage = allTextRowLanguage;
             return initParams;
         });
     }
