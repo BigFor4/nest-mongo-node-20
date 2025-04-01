@@ -69,6 +69,7 @@ export class XmlService {
                 parentId: product['ParentID'] || parentId || '',
                 userTypeID: product['UserTypeID'] || '',
                 assetCrossReference: [],
+                allTextRow: '',
             };
             const assetCrossReference = [];
             if (!Array.isArray(product['AssetCrossReference'])) {
@@ -95,6 +96,7 @@ export class XmlService {
                     item[value['AttributeID']] = textValue;
                 });
             }
+            item.allTextRow = allTextRow;
             acc.push(item);
             if (product['Product']) {
                 acc = acc.concat(this.transformProduct(product['Product'], product['ID']));
