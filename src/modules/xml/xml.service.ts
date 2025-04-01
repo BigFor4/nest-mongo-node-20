@@ -30,7 +30,9 @@ const keyConvert = {
 @Injectable()
 export class XmlService {
     async parseXml(xmlData: string): Promise<any> {
-        xmlData = xmlData.replaceAll('AttributeID="asset.', 'AttributeID="att_');
+        xmlData = xmlData
+            .replaceAll('AttributeID="asset.', 'AttributeID="att_')
+            .replaceAll(/\s+/g, ' ');
         const parser = new XMLParser({
             ignoreAttributes: false,
             attributeNamePrefix: '',
@@ -39,36 +41,86 @@ export class XmlService {
         });
         const parsedData = parser.parse(xmlData);
         const assetsArray = parsedData['STEP-ProductInformation']['Assets']['Asset'];
+        const assets = this.transformAssets(assetsArray);
+
         const classificationArray =
             parsedData['STEP-ProductInformation']['Classifications']['Classification'];
-        const assets = this.transformAssets(assetsArray);
         const classifications = this.transformClassification(classificationArray);
+
+        const productArray = parsedData['STEP-ProductInformation']['Products']['Product'];
+        const products = this.transformProduct(productArray);
         return {
-            success: true,
+            products,
             classifications,
             assets,
         };
+    }
+    private transformProduct(arrayData: any[], parentId?: string): any[] {
+        if (!Array.isArray(arrayData)) {
+            arrayData = [arrayData];
+        }
+        return arrayData.reduce((acc, product) => {
+            const _id = product['ID'] || '';
+            const name = product['Name'] || '';
+            let allTextRow = _id + ' ' + name;
+            const item = {
+                _id,
+                name,
+                parentId: parentId || product['ParentID'] || '',
+                userTypeID: product['UserTypeID'] || '',
+                assetCrossReference: [],
+            };
+            const assetCrossReference = [];
+            if (!Array.isArray(product['AssetCrossReference'])) {
+                product['AssetCrossReference'] = product['AssetCrossReference']
+                    ? [product['AssetCrossReference']]
+                    : [];
+            }
+            product['AssetCrossReference'].map((reference) => {
+                assetCrossReference.push({
+                    assetID: reference['AssetID'] || '',
+                    type: reference['QualifierID'] || '',
+                });
+            });
+            item.assetCrossReference = assetCrossReference;
+            if (product['Values']) {
+                if (!Array.isArray(product['Values']['Value'])) {
+                    product['Values']['Value'] = product['Values']['Value']
+                        ? [product['Values']['Value']]
+                        : [];
+                }
+                product['Values']['Value'].map((value) => {
+                    const textValue = value['DamText'] || '';
+                    allTextRow = allTextRow + ' ' + textValue;
+                    item[value['AttributeID']] = textValue;
+                });
+            }
+            acc.push(item);
+            if (product['Product']) {
+                acc = acc.concat(this.transformProduct(product['Product'], product['ID']));
+            }
+            return acc;
+        }, []);
     }
 
     private transformClassification(arrayData: any[]): any[] {
         return arrayData.map((asset) => {
             let allTextRow = '';
             const _id = asset['ID'] || '';
-            const user_type = asset['UserTypeID'] || '';
             allTextRow = allTextRow + ' ' + _id;
             const initParams = {
                 _id: asset['ID'] || '',
                 name: {},
-                parent_id: asset['UserTypeID'] || '',
+                parentId: asset['ParentID'] || '',
+                userTypeID: asset['UserTypeID'] || '',
                 referenced: asset['Referenced'],
-                user_type,
                 allTextRow: '',
-                attribute_link: [],
+                attributeLink: [],
                 metadata: {},
             };
             if (asset?.['Name']) {
                 if (!Array.isArray(asset['Name'])) {
-                    asset['Name'] = [asset['Name']];
+                    asset['Name'] = asset['Name'] ? [asset['Name']] : [];
                 }
                 asset['Name'].map((value) => {
                     const textValue = value['DamText'] || '';
@@ -82,21 +134,25 @@ export class XmlService {
             }
             if (asset?.['AttributeLink']) {
                 if (!Array.isArray(asset['AttributeLink'])) {
-                    asset['AttributeLink'] = [asset['AttributeLink']];
+                    asset['AttributeLink'] = asset['AttributeLink'] ? [asset['AttributeLink']] : [];
                 }
-                initParams.attribute_link = asset['AttributeLink'].map((value) => {
+                initParams.attributeLink = asset['AttributeLink'].map((value) => {
                     const textValue = value['AttributeID'] || '';
                     return textValue;
                 });
             }
             if (asset?.['MetaData']) {
                 if (!Array.isArray(asset['MetaData']['MultiValue'])) {
-                    asset['MetaData']['MultiValue'] = [asset['MetaData']['MultiValue']];
+                    asset['MetaData']['MultiValue'] = asset['MetaData']['MultiValue']
+                        ? [asset['MetaData']['MultiValue']]
+                        : [];
                 }
                 const metadata = {};
                 asset['MetaData']['MultiValue'].map((multiValue) => {
                     if (!Array.isArray(multiValue['ValueGroup'])) {
-                        multiValue['ValueGroup'] = [multiValue['ValueGroup']];
+                        multiValue['ValueGroup'] = multiValue['ValueGroup']
+                            ? [multiValue['ValueGroup']]
+                            : [];
                     }
                     multiValue['ValueGroup'].map((group) => {
                         if (group?.['Value']?.length > 0) {
@@ -131,7 +187,7 @@ export class XmlService {
         return arrayData.map((asset) => {
             let allTextRow = '';
             const _id = asset['ID'] || '';
-            const name = asset['Name']?.text || '';
+            const name = asset['Name']['DamText'] || '';
             const objectTypeID = asset['UserTypeID'] || '';
             allTextRow = allTextRow + ' ' + _id + ' ' + name + ' ' + objectTypeID;
             const initParams = {
@@ -141,10 +197,10 @@ export class XmlService {
                 allTextRow,
                 classification: [],
             };
-            if (!asset?.['ClassificationReference']) {
-                asset['ClassificationReference'] = [];
-            } else if (!Array.isArray(asset['ClassificationReference'])) {
-                asset['ClassificationReference'] = [asset['ClassificationReference']];
+            if (!Array.isArray(asset['ClassificationReference'])) {
+                asset['ClassificationReference'] = asset['ClassificationReference']
+                    ? [asset['ClassificationReference']]
+                    : [];
             }
             const classification = asset['ClassificationReference'].map((value) => {
                 const textValue = value['ClassificationID'] || '';
@@ -153,7 +209,9 @@ export class XmlService {
             initParams.classification = classification || [];
             if (asset?.['Values']?.['Value']) {
                 if (!Array.isArray(asset['Values']['Value'])) {
-                    asset['Values']['Value'] = [asset['Values']['Value']];
+                    asset['Values']['Value'] = asset['Values']['Value']
+                        ? [asset['Values']['Value']]
+                        : [];
                 }
                 asset['Values']['Value'].map((value) => {
                     const textValue = value['DamText'] || '';
@@ -163,7 +221,9 @@ export class XmlService {
             }
             if (asset?.['Values']?.['ValueGroup']) {
                 if (!Array.isArray(asset['Values']['ValueGroup'])) {
-                    asset['Values']['ValueGroup'] = [asset['Values']['ValueGroup']];
+                    asset['Values']['ValueGroup'] = asset['Values']['ValueGroup']
+                        ? [asset['Values']['ValueGroup']]
+                        : [];
                 }
                 asset['Values']['ValueGroup'].map((group) => {
                     if (group?.['Value']?.length > 0) {
@@ -184,7 +244,9 @@ export class XmlService {
             }
             if (asset?.['Values']?.['MultiValue']) {
                 if (!Array.isArray(asset['Values']['MultiValue'])) {
-                    asset['Values']['MultiValue'] = [asset['Values']['MultiValue']];
+                    asset['Values']['MultiValue'] = asset['Values']['MultiValue']
+                        ? [asset['Values']['MultiValue']]
+                        : [];
                 }
                 asset['Values']['MultiValue'].map((group) => {
                     if (group?.['Value']?.length > 0) {
