@@ -45,36 +45,38 @@ export class XmlService {
         const classifications = this.transformClassification(classificationArray);
         return {
             success: true,
-            assets,
             classifications,
+            assets,
         };
     }
 
-    private transformClassification(assetArray: any[]): any[] {
-        return assetArray.map((asset) => {
+    private transformClassification(arrayData: any[]): any[] {
+        return arrayData.map((asset) => {
             let allTextRow = '';
             const _id = asset['ID'] || '';
             const user_type = asset['UserTypeID'] || '';
             allTextRow = allTextRow + ' ' + _id;
             const initParams = {
                 _id: asset['ID'] || '',
-                name: [],
+                name: {},
                 parent_id: asset['UserTypeID'] || '',
                 referenced: asset['Referenced'],
                 user_type,
                 allTextRow: '',
                 attribute_link: [],
-                metadata: [],
+                metadata: {},
             };
             if (asset?.['Name']) {
                 if (!Array.isArray(asset['Name'])) {
                     asset['Name'] = [asset['Name']];
                 }
-                initParams.name = asset['Name'].map((value) => {
+                asset['Name'].map((value) => {
                     const textValue = value['DamText'] || '';
                     allTextRow = allTextRow + ' ' + textValue;
-                    return {
-                        [keyConvert[value['QualifierID']]]: textValue,
+                    const key = keyConvert[value['QualifierID']] || 'Root';
+                    initParams.name = {
+                        ...initParams.name,
+                        [key]: textValue,
                     };
                 });
             }
@@ -91,14 +93,42 @@ export class XmlService {
                 if (!Array.isArray(asset['MetaData']['MultiValue'])) {
                     asset['MetaData']['MultiValue'] = [asset['MetaData']['MultiValue']];
                 }
+                const metadata = {};
+                asset['MetaData']['MultiValue'].map((multiValue) => {
+                    if (!Array.isArray(multiValue['ValueGroup'])) {
+                        multiValue['ValueGroup'] = [multiValue['ValueGroup']];
+                    }
+                    multiValue['ValueGroup'].map((group) => {
+                        if (group?.['Value']?.length > 0) {
+                            group['Value'].map((value) => {
+                                const textValue = value['DamText'] || '';
+                                allTextRow = allTextRow + ' ' + textValue;
+                                if (
+                                    metadata[
+                                        keyConvert[value['QualifierID'] || value['QualifierID']]
+                                    ]
+                                ) {
+                                    metadata[
+                                        keyConvert[value['QualifierID'] || value['QualifierID']]
+                                    ].push(textValue);
+                                } else {
+                                    metadata[
+                                        keyConvert[value['QualifierID'] || value['QualifierID']]
+                                    ] = [textValue];
+                                }
+                            });
+                        }
+                    });
+                });
+                initParams.metadata = metadata;
             }
             initParams.allTextRow = allTextRow;
             return initParams;
         });
     }
 
-    private transformAssets(assetArray: any[]): any[] {
-        return assetArray.map((asset) => {
+    private transformAssets(arrayData: any[]): any[] {
+        return arrayData.map((asset) => {
             let allTextRow = '';
             const _id = asset['ID'] || '';
             const name = asset['Name']?.text || '';
@@ -137,10 +167,14 @@ export class XmlService {
                 }
                 asset['Values']['ValueGroup'].map((group) => {
                     if (group?.['Value']?.length > 0) {
-                        initParams[group['AttributeID']] = group['Value'].map((value) => {
+                        if (!initParams[group['AttributeID']]) {
+                            initParams[group['AttributeID']] = {};
+                        }
+                        group['Value'].map((value) => {
                             const textValue = value['DamText'] || '';
                             allTextRow = allTextRow + ' ' + textValue;
-                            return {
+                            initParams[group['AttributeID']] = {
+                                ...initParams[group['AttributeID']],
                                 [keyConvert[value['DerivedContextID'] || value['QualifierID']]]:
                                     textValue,
                             };
@@ -157,9 +191,7 @@ export class XmlService {
                         initParams[group['AttributeID']] = group['Value'].map((value) => {
                             const textValue = value['DamText'] || '';
                             allTextRow = allTextRow + ' ' + textValue;
-                            return {
-                                [keyConvert[value['QualifierID']]]: textValue,
-                            };
+                            return textValue;
                         });
                     }
                 });
