@@ -18,7 +18,7 @@ export class Product {
     assetCrossReference?: object[];
 
     @Prop({ type: String })
-    allTextRow: string[];
+    allTextRow: string;
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);

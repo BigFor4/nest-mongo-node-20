@@ -97,6 +97,9 @@ export class Asset {
 
     @Prop({ type: String })
     'att_mime-type'?: string;
+
+    @Prop({ type: String })
+    allTextRow: string;
 }
 
 export const AssetSchema = SchemaFactory.createForClass(Asset);

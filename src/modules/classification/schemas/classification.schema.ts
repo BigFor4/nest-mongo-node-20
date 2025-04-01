@@ -20,14 +20,14 @@ export class Classification {
     @Prop({ type: String })
     referenced: string;
 
-    @Prop({ type: String })
-    allTextRow: string;
-
     @Prop({ type: [String] })
     attributeLink: string[];
 
     @Prop({ type: Object, default: {} })
     metadata?: object;
+
+    @Prop({ type: String })
+    allTextRow: string;
 }
 
 export const ClassificationSchema = SchemaFactory.createForClass(Classification);
