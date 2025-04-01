@@ -40,12 +40,12 @@ export class XmlService {
             trimValues: true,
         });
         const parsedData = parser.parse(xmlData);
-        const assetsArray = parsedData['STEP-ProductInformation']['Assets']['Asset'];
-        const assets = this.transformAssets(assetsArray);
-
         const classificationArray =
             parsedData['STEP-ProductInformation']['Classifications']['Classification'];
         const classifications = this.transformClassification(classificationArray);
+
+        const assetsArray = parsedData['STEP-ProductInformation']['Assets']['Asset'];
+        const assets = this.transformAssets(assetsArray, classifications);
 
         const productArray = parsedData['STEP-ProductInformation']['Products']['Product'];
         const products = this.transformProduct(productArray);
@@ -183,8 +183,8 @@ export class XmlService {
         });
     }
 
-    private transformAssets(arrayData: any[]): any[] {
-        return arrayData.map((asset) => {
+    private transformAssets(assetsArray: any[], arrayClassifications: any[]): any[] {
+        return assetsArray.map((asset) => {
             let allTextRow = '';
             const _id = asset['ID'] || '';
             const name = asset['Name']?.['DamText'] || '';
@@ -195,18 +195,32 @@ export class XmlService {
                 name,
                 objectTypeID,
                 allTextRow,
-                classification: [],
+                classifications: [],
+                classificationFolders: [],
             };
             if (!Array.isArray(asset['ClassificationReference'])) {
                 asset['ClassificationReference'] = asset['ClassificationReference']
                     ? [asset['ClassificationReference']]
                     : [];
             }
-            const classification = asset['ClassificationReference'].map((value) => {
+            const classifications = [];
+            const classificationFolders = [];
+            asset['ClassificationReference'].map((value) => {
                 const textValue = value['ClassificationID'] || '';
+                const classification = arrayClassifications.find((x) => x._id === textValue);
+                if (classification) {
+                    if (classification.userTypeID === 'AssetFolder') {
+                        classificationFolders.push(textValue);
+                    } else {
+                        classifications.push(textValue);
+                    }
+                } else {
+                    classifications.push(textValue);
+                }
                 return textValue;
             });
-            initParams.classification = classification || [];
+            initParams.classifications = classifications || [];
+            initParams.classificationFolders = classificationFolders || [];
             if (asset?.['Values']?.['Value']) {
                 if (!Array.isArray(asset['Values']['Value'])) {
                     asset['Values']['Value'] = asset['Values']['Value']
