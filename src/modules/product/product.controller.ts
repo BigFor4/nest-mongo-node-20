@@ -2,7 +2,9 @@ import { Controller, Get, Query } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { BaseController } from '@base/base.controller';
 import { ProductDocument } from './schemas/product.schema';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Product')
 @Controller('products')
 export class ProductController extends BaseController<ProductDocument> {
     constructor(private readonly productService: ProductService) {

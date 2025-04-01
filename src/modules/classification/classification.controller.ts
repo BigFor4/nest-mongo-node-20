@@ -2,7 +2,9 @@ import { Controller, Get, Query } from '@nestjs/common';
 import { ClassificationService } from './classification.service';
 import { BaseController } from '@base/base.controller';
 import { ClassificationDocument } from './schemas/classification.schema';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Classification')
 @Controller('classifications')
 export class ClassificationController extends BaseController<ClassificationDocument> {
     constructor(private readonly classificationService: ClassificationService) {

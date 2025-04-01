@@ -1,7 +1,9 @@
 import { Controller, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { XmlService } from './xml.service';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Xml')
 @Controller('xml')
 export class XmlController {
     constructor(private readonly xmlService: XmlService) {}
