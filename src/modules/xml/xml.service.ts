@@ -71,6 +71,7 @@ export class XmlService {
         };
     }
     async saveClassifications(classifications: Classification[]) {
+        await this.classificationModel.deleteMany();
         const operations = classifications.map((classification) => ({
             updateOne: {
                 filter: { _id: classification._id },
@@ -78,11 +79,11 @@ export class XmlService {
                 upsert: true,
             },
         }));
-
         await this.classificationModel.bulkWrite(operations);
     }
 
     async saveAssets(assets: Asset[]) {
+        await this.assetModel.deleteMany();
         const operations = assets.map((asset) => ({
             updateOne: {
                 filter: { _id: asset._id },
@@ -90,11 +91,11 @@ export class XmlService {
                 upsert: true,
             },
         }));
-
         await this.assetModel.bulkWrite(operations);
     }
 
     async saveProducts(products: Product[]) {
+        await this.productModel.deleteMany();
         const operations = products.map((product) => ({
             updateOne: {
                 filter: { _id: product._id },
@@ -102,7 +103,6 @@ export class XmlService {
                 upsert: true,
             },
         }));
-
         await this.productModel.bulkWrite(operations);
     }
 
