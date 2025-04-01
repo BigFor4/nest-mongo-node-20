@@ -8,19 +8,26 @@ export class Classification {
     @Prop({ required: true, type: String })
     _id: string;
 
-    @Prop({ required: true, type: String })
-    user_type: string;
+    @Prop({ type: Object })
+    name: object[];
 
-    @Prop({ required: true, type: String })
-    parent_id: string;
+    @Prop({ type: String })
+    parentId: string;
 
-    @Prop({ required: true, type: Object })
-    name: Record<string, any>;
+    @Prop({ type: String })
+    userTypeID: string;
+
+    @Prop({ type: String })
+    referenced: string;
+
+    @Prop({ type: String })
+    allTextRow: string;
+
+    @Prop({ type: [String] })
+    attributeLink: string[];
 
     @Prop({ type: Object, default: {} })
-    meta_data?: Record<string, any>;
-    @Prop({ type: [String] })
-    attribute_link: string[];
+    metadata?: object;
 }
 
 export const ClassificationSchema = SchemaFactory.createForClass(Classification);

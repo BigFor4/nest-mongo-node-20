@@ -10,6 +10,9 @@ import { Classification, ClassificationSchema } from './schemas/classification.s
     ],
     controllers: [ClassificationController],
     providers: [ClassificationService],
-    exports: [ClassificationService],
+    exports: [
+        ClassificationService,
+        MongooseModule.forFeature([{ name: Classification.name, schema: ClassificationSchema }]),
+    ],
 })
 export class ClassificationModule {}

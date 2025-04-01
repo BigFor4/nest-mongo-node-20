@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsObject, IsOptional } from 'class-validator';
+import { IsNotEmpty, IsString, IsObject, IsOptional, IsArray } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateClassificationDto {
@@ -10,20 +10,35 @@ export class CreateClassificationDto {
     @IsString()
     @IsNotEmpty()
     @ApiProperty()
-    user_type!: string;
+    userTypeId!: string;
 
     @IsString()
     @IsNotEmpty()
     @ApiProperty()
-    parent_id!: string;
+    parentId!: string;
 
-    @IsObject()
+    @IsArray()
     @IsNotEmpty()
-    @ApiProperty({ type: Object })
-    name!: object;
+    @ApiProperty({ type: [Object] })
+    name!: object[];
 
-    @IsObject()
     @IsOptional()
+    @IsObject()
     @ApiProperty({ type: Object, required: false })
-    meta_data?: object;
+    metadata?: object;
+
+    @IsString()
+    @IsOptional()
+    @ApiProperty()
+    referenced?: string;
+
+    @IsString()
+    @IsOptional()
+    @ApiProperty()
+    allTextRow?: string;
+
+    @IsArray()
+    @IsOptional()
+    @ApiProperty({ type: [String] })
+    attributeLink?: string[];
 }

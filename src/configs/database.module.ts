@@ -1,11 +1,19 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
     imports: [
-        MongooseModule.forRoot(process.env.DATABASE_URI || 'mongodb://localhost:27017/dam', {
-            user: process.env.DATABASE_USERNAME,
-            pass: process.env.DATABASE_PASSWORD,
+        MongooseModule.forRootAsync({
+            imports: [ConfigModule],
+            inject: [ConfigService],
+            useFactory: (configService: ConfigService) => {
+                return {
+                    uri: configService.get<string>('DATABASE_URI'),
+                    user: configService.get<string>('DATABASE_USERNAME'),
+                    pass: configService.get<string>('DATABASE_PASSWORD'),
+                };
+            },
         }),
     ],
 })

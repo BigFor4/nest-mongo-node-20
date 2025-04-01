@@ -1,5 +1,10 @@
+import { Asset } from '@modules/asset/schemas/asset.schema';
+import { Classification } from '@modules/classification/schemas/classification.schema';
+import { Product } from '@modules/product/schemas/product.schema';
 import { Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
 import { XMLParser } from 'fast-xml-parser';
+import { Model } from 'mongoose';
 const keyConvert = {
     Root: 'Root',
     'Qualifier root': 'Root',
@@ -29,6 +34,11 @@ const keyConvert = {
 };
 @Injectable()
 export class XmlService {
+    constructor(
+        @InjectModel(Product.name) private productModel: Model<Product>,
+        @InjectModel(Classification.name) private classificationModel: Model<Classification>,
+        @InjectModel(Asset.name) private assetModel: Model<Asset>,
+    ) {}
     async parseXml(xmlData: string): Promise<any> {
         xmlData = xmlData
             .replaceAll('AttributeID="asset.', 'AttributeID="att_')
@@ -49,21 +59,64 @@ export class XmlService {
 
         const productArray = parsedData['STEP-ProductInformation']['Products']['Product'];
         const products = this.transformProduct(productArray);
+
+        await this.saveClassifications(classifications);
+        await this.saveAssets(assets);
+        await this.saveProducts(products);
+
         return {
             products,
             classifications,
             assets,
         };
     }
+    async saveClassifications(classifications: Classification[]) {
+        const operations = classifications.map((classification) => ({
+            updateOne: {
+                filter: { _id: classification._id },
+                update: { $set: classification },
+                upsert: true,
+            },
+        }));
+
+        await this.classificationModel.bulkWrite(operations);
+    }
+
+    async saveAssets(assets: Asset[]) {
+        const operations = assets.map((asset) => ({
+            updateOne: {
+                filter: { _id: asset._id },
+                update: { $set: asset },
+                upsert: true,
+            },
+        }));
+
+        await this.assetModel.bulkWrite(operations);
+    }
+
+    async saveProducts(products: Product[]) {
+        const operations = products.map((product) => ({
+            updateOne: {
+                filter: { _id: product._id },
+                update: { $set: product },
+                upsert: true,
+            },
+        }));
+
+        await this.productModel.bulkWrite(operations);
+    }
+
     private transformProduct(arrayData: any[], parentId?: string): any[] {
         if (!Array.isArray(arrayData)) {
             arrayData = [arrayData];
         }
         return arrayData.reduce((acc, product) => {
             const _id = product['ID'] || '';
-            let allTextRow = _id;
+            const name = product['Name']?.['DamText'] || '';
+            let allTextRow = _id + ' ' + name;
             const item = {
                 _id,
+                name,
                 parentId: product['ParentID'] || parentId || '',
                 userTypeID: product['UserTypeID'] || '',
                 assetCrossReference: [],
