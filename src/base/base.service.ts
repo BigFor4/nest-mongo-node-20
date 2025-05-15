@@ -19,13 +19,19 @@ export class BaseService<T extends Document> {
     }
 
     async findPaginated(
+        query: any,
         page: number,
         limit: number
     ): Promise<{ data: T[]; total: number }> {
+        if (!query) {
+            query = {};
+        } else if (typeof query === 'string') {
+            query = { _id: query };
+        }
         const skip = (page - 1) * limit;
         const [data, total] = await Promise.all([
-            this.model.find().skip(skip).limit(limit).exec(),
-            this.model.countDocuments().exec(),
+            this.model.find(query).skip(skip).limit(limit).exec(),
+            this.model.countDocuments(query).exec(),
         ]);
         return { data, total };
     }

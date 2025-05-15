@@ -67,7 +67,7 @@ export class AuthService {
             throw new UnauthorizedException('Invalid Auth0 user');
         }
 
-        let user = await this.userService.findByEmail(authId);
+        let user: any = await this.userService.findByEmail(authId);
         if (!user) {
             user = await this.register({
                 email: authId,
@@ -96,7 +96,7 @@ export class AuthService {
             throw new UnauthorizedException('Invalid credentials');
         }
 
-        const payload = { sub: user.id, email: user.email };
+        const payload = { sub: user._id, email: user.email };
         const token = this.jwtService.sign(payload);
 
         return {
@@ -115,6 +115,13 @@ export class AuthService {
             ...loginUserDto,
             password: hashedPassword,
         });
+        const payload = { sub: createdUser._id, email: createdUser.email };
+        const token = this.jwtService.sign(payload);
+
+        return {
+            accessToken: token,
+            user: omit(createdUser, ['password']),
+        };
         return createdUser;
     }
 }

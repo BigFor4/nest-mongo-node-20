@@ -10,7 +10,7 @@ import {
 import { BaseService } from './base.service';
 import { Document } from 'mongoose';
 import { AuthGuardConfig } from '@configs/guard.config';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 
 export class BaseController<T extends Document> {
     constructor(private readonly baseService: BaseService<T>) {}
@@ -27,6 +27,27 @@ export class BaseController<T extends Document> {
     @UseGuards(AuthGuardConfig)
     createByQuery(@Body() query: Partial<T>) {
         return this.baseService.createByQuery(query);
+    }
+
+    @Post('paginate')
+    @ApiBearerAuth('access-token')
+    @UseGuards(AuthGuardConfig)
+    @ApiBody({
+        schema: {
+            type: 'object',
+            properties: {
+                query: { type: 'object' },
+                page: { type: 'number', default: 1 },
+                limit: { type: 'number', default: 10 },
+            },
+            required: ['page', 'limit'],
+        },
+    })
+    async findPaginated(
+        @Body() body: { query?: Partial<T>; page: number; limit: number }
+    ) {
+        const { query, page, limit } = body;
+        return this.baseService.findPaginated(query || {}, page, limit);
     }
 
     @Get()

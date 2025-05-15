@@ -40,7 +40,7 @@ export class AuthController {
     @Post()
     @ApiOperation({ summary: 'register' })
     @ApiBody({ type: CreateUserDto })
-    async register(@Body() body: CreateUserDto): Promise<UserDocument> {
+    async register(@Body() body: CreateUserDto) {
         const CreateUserSchema = Joi.object({
             firstName: Joi.string().required(),
             lastName: Joi.string().required(),
