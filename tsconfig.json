@@ -30,6 +30,9 @@
       "@modules/*": [
         "./src/modules/*"
       ],
+      "@dtoContants/*": [
+        "./src/dtoContants/*"
+      ],
     }
   }
 }

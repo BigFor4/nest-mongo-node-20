@@ -15,8 +15,10 @@ import { AppModule } from './app.module';
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
     const configSerice = app.get(ConfigService);
-    const port = +configSerice.get<number>('PORT') || 3306;
-    const host = +configSerice.get<number>('HOST') || 'http://localhost';
+    const port = configSerice.get<number>('PORT');
+    const host = configSerice.get<string>('HOST');
+    const nodeEnv = configSerice.get<string>('NODE_ENV');
+    const urlApi = `${nodeEnv === 'development' ? 'http' : 'https'}://${host}:${port}`;
     const httpAdapterHost = app.get(HttpAdapterHost);
 
     app.use(helmet());
@@ -24,7 +26,10 @@ async function bootstrap() {
     app.enableCors();
     app.use(compression());
 
-    app.useGlobalFilters(new HttpExceptionFilter(), new AllExceptionsFilter(httpAdapterHost));
+    app.useGlobalFilters(
+        new HttpExceptionFilter(),
+        new AllExceptionsFilter(httpAdapterHost)
+    );
 
     app.setGlobalPrefix('api');
     app.useGlobalInterceptors(new ResponseTransformInterceptor());
@@ -36,22 +41,31 @@ async function bootstrap() {
             transformOptions: {
                 enableImplicitConversion: true,
             },
-        }),
+        })
     );
     const config = new DocumentBuilder()
         .setTitle('API')
         .setDescription('The API P0287')
         .setVersion('1.0')
-        .addServer(`${host}:${port}`, `Localhost`)
-        .addServer(`${host}:${port}`, `Host`)
-        .addBearerAuth()
+        .addServer(urlApi, `Localhost`)
+        .addServer(urlApi, `Host`)
+        .addBearerAuth(
+            {
+                name: 'Authorization',
+                bearerFormat: 'Bearer',
+                scheme: 'Bearer',
+                type: 'http',
+                in: 'Header'
+            },
+            'access-token',
+        )
         .build();
 
     const document = SwaggerModule.createDocument(app, config);
     SwaggerModule.setup('/api-docs', app, document);
 
     await app.listen(port);
-    console.log(`=========== 🕵  Server running on ${host}:${port} ===========‍`);
-    console.log(`URL for Swagger [OpenApi]: ${host}:${port}/api-docs`);
+    console.log(`=========== 🕵  Server running on ${urlApi} ===========‍`);
+    console.log(`URL for Swagger [OpenApi]: ${urlApi}/api-docs`);
 }
 bootstrap();
