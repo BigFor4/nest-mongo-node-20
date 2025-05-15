@@ -5,6 +5,8 @@ import { UserModule } from '@modules/user/user.module';
 import * as Joi from 'joi';
 import { AuthModule } from '@modules/auth/auth.module';
 import { TableModule } from '@modules/table/table.module';
+import { RegistryModule } from '@modules/registry/registry.module';
+import { MetaModule } from '@modules/meta/meta.module';
 
 @Module({
     imports: [
@@ -24,6 +26,8 @@ import { TableModule } from '@modules/table/table.module';
         AuthModule,
         UserModule,
         TableModule,
+        RegistryModule,
+        MetaModule,
     ],
     controllers: [],
     providers: [],

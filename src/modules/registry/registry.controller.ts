@@ -5,7 +5,7 @@ import { RegistryDocument } from './schemas/registry.schema';
 import { ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Registry')
-@Controller('registrys')
+@Controller('registry')
 export class RegistryController extends BaseController<RegistryDocument> {
     constructor(private readonly registryService: RegistryService) {
         super(registryService);

@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 
-@Schema({ timestamps: false })
+@Schema({ timestamps: false, collection: 'registry' })
 export class Registry {
     @Prop({ type: String, required: true })
     id: string;
