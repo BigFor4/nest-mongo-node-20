@@ -1,4 +1,10 @@
-import { BadRequestException, Body, Controller, Post, UseGuards } from '@nestjs/common';
+import {
+    BadRequestException,
+    Body,
+    Controller,
+    Post,
+    UseGuards,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { BaseController } from '@base/base.controller';
 import { UserDocument } from './schemas/user.schema';

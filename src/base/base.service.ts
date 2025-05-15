@@ -18,7 +18,10 @@ export class BaseService<T extends Document> {
         return this.model.find().exec();
     }
 
-    async findPaginated(page: number, limit: number): Promise<{ data: T[]; total: number }> {
+    async findPaginated(
+        page: number,
+        limit: number
+    ): Promise<{ data: T[]; total: number }> {
         const skip = (page - 1) * limit;
         const [data, total] = await Promise.all([
             this.model.find().skip(skip).limit(limit).exec(),
@@ -34,14 +37,17 @@ export class BaseService<T extends Document> {
     }
 
     async update(id: string, updateDto: Partial<T>): Promise<T> {
-        const updatedItem = await this.model.findByIdAndUpdate(id, updateDto, { new: true }).exec();
+        const updatedItem = await this.model
+            .findByIdAndUpdate(id, updateDto, { new: true })
+            .exec();
         if (!updatedItem) throw new NotFoundException('Item not found');
         return updatedItem;
     }
 
     async updateByQuery(filter: any, updateDto: Partial<T>): Promise<number> {
         const result = await this.model.updateMany(filter, updateDto).exec();
-        if (result.modifiedCount === 0) throw new NotFoundException('No items matched the query');
+        if (result.modifiedCount === 0)
+            throw new NotFoundException('No items matched the query');
         return result.modifiedCount;
     }
 
@@ -53,7 +59,8 @@ export class BaseService<T extends Document> {
 
     async removeByQuery(filter: any): Promise<number> {
         const result = await this.model.deleteMany(filter).exec();
-        if (result.deletedCount === 0) throw new NotFoundException('No items matched the query');
+        if (result.deletedCount === 0)
+            throw new NotFoundException('No items matched the query');
         return result.deletedCount;
     }
 }

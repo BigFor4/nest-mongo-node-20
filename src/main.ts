@@ -55,9 +55,9 @@ async function bootstrap() {
                 bearerFormat: 'Bearer',
                 scheme: 'Bearer',
                 type: 'http',
-                in: 'Header'
+                in: 'Header',
             },
-            'access-token',
+            'access-token'
         )
         .build();
 

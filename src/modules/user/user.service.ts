@@ -9,7 +9,7 @@ import { CreateUserDto } from '@dtoContants/register-user.dto';
 export class UserService extends BaseService<UserDocument> {
     constructor(
         @InjectModel(User.name)
-        private userModel: Model<UserDocument>,
+        private userModel: Model<UserDocument>
     ) {
         super(userModel);
     }

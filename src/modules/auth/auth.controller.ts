@@ -36,7 +36,7 @@ export class AuthController {
         if (error) throw error;
         return this.authService.login(body.email, body.password);
     }
-    
+
     @Post()
     @ApiOperation({ summary: 'register' })
     @ApiBody({ type: CreateUserDto })

@@ -3,7 +3,6 @@ import { Document, Types } from 'mongoose';
 
 @Schema({ timestamps: true })
 export class User {
-
     @Prop({ type: String })
     firstName: string;
 

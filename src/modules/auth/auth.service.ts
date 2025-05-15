@@ -12,26 +12,32 @@ export class AuthService {
         private userService: UserService,
         private jwtService: JwtService,
         private configService: ConfigService
-    ) { }
+    ) {}
 
     async validateAuthIdWithAuth0(authId: string): Promise<boolean> {
         const domain = this.configService.get<string>('AUTH0_DOMAIN');
         const clientID = this.configService.get<string>('AUTH0_CLIENT_ID');
-        const clientSecret = this.configService.get<string>('AUTH0_CLIENT_SECRET');
+        const clientSecret = this.configService.get<string>(
+            'AUTH0_CLIENT_SECRET'
+        );
         if (!domain || !clientID || !clientSecret) {
             throw new UnauthorizedException('Auth0 configuration missing');
         }
         try {
-            const tokenResponse = await axios.post(`https://${domain}/oauth/token`, {
-                client_id: clientID,
-                client_secret: clientSecret,
-                audience: `https://${domain}/api/v2/`,
-                grant_type: 'client_credentials'
-            }, {
-                headers: {
-                    'Content-Type': 'application/json'
+            const tokenResponse = await axios.post(
+                `https://${domain}/oauth/token`,
+                {
+                    client_id: clientID,
+                    client_secret: clientSecret,
+                    audience: `https://${domain}/api/v2/`,
+                    grant_type: 'client_credentials',
+                },
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
                 }
-            });
+            );
             const managementToken = tokenResponse.data.access_token;
             const userResponse = await axios.get(
                 `https://${domain}/api/v2/users/${encodeURIComponent(authId)}`,
@@ -46,7 +52,10 @@ export class AuthService {
             if (error.response && error.response.status === 404) {
                 return false;
             }
-            console.error('Error validating Auth0 user:', error.response?.data || error.message);
+            console.error(
+                'Error validating Auth0 user:',
+                error.response?.data || error.message
+            );
             throw new UnauthorizedException('Error validating Auth0 user');
         }
     }

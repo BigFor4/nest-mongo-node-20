@@ -6,7 +6,10 @@ import { User, UserSchema } from './schemas/user.schema';
 import { JwtConfig } from '@configs/jwt.config';
 
 @Module({
-    imports: [JwtConfig, MongooseModule.forFeature([{ name: User.name, schema: UserSchema }])],
+    imports: [
+        JwtConfig,
+        MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+    ],
     controllers: [UserController],
     providers: [UserService],
     exports: [UserService],

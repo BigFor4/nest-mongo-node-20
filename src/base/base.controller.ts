@@ -1,4 +1,12 @@
-import { Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import {
+    Get,
+    Post,
+    Body,
+    Patch,
+    Param,
+    Delete,
+    UseGuards,
+} from '@nestjs/common';
 import { BaseService } from './base.service';
 import { Document } from 'mongoose';
 import { AuthGuardConfig } from '@configs/guard.config';
