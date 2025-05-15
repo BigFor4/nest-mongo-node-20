@@ -15,6 +15,19 @@ const LoginSchema = Joi.object({
 export class AuthController {
     constructor(private authService: AuthService) {}
 
+    @Post('login-auth-id')
+    @ApiOperation({ summary: 'Login with Auth ID' })
+    @ApiBody({ schema: { properties: { authId: { type: 'string' } } } })
+    async loginWithAuthId(@Body() body: { authId: string }) {
+        const AuthIdSchema = Joi.object({
+            authId: Joi.string().required(),
+        });
+        const { error } = AuthIdSchema.validate(body);
+        if (error) throw new BadRequestException(error.details[0].message);
+
+        return this.authService.loginWithAuthId(body.authId);
+    }
+
     @Post('login')
     @ApiOperation({ summary: 'Login' })
     @ApiBody({ type: LoginUserDto })

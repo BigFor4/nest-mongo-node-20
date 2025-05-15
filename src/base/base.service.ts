@@ -9,6 +9,11 @@ export class BaseService<T extends Document> {
         return createdItem.save();
     }
 
+    async createByQuery(query: Partial<T>): Promise<T> {
+        const createdItem = new this.model(query);
+        return createdItem.save();
+    }
+
     async findAll(): Promise<T[]> {
         return this.model.find().exec();
     }
@@ -34,9 +39,21 @@ export class BaseService<T extends Document> {
         return updatedItem;
     }
 
+    async updateByQuery(filter: any, updateDto: Partial<T>): Promise<number> {
+        const result = await this.model.updateMany(filter, updateDto).exec();
+        if (result.modifiedCount === 0) throw new NotFoundException('No items matched the query');
+        return result.modifiedCount;
+    }
+
     async remove(id: string): Promise<boolean> {
         const result = await this.model.findByIdAndDelete(id).exec();
         if (!result) throw new NotFoundException('Item not found');
         return true;
+    }
+
+    async removeByQuery(filter: any): Promise<number> {
+        const result = await this.model.deleteMany(filter).exec();
+        if (result.deletedCount === 0) throw new NotFoundException('No items matched the query');
+        return result.deletedCount;
     }
 }

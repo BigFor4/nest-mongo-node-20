@@ -14,6 +14,13 @@ export class BaseController<T extends Document> {
         return this.baseService.create(createDto);
     }
 
+    @Post('create-by-query')
+    @ApiBearerAuth('access-token')
+    @UseGuards(AuthGuardConfig)
+    createByQuery(@Body() query: Partial<T>) {
+        return this.baseService.createByQuery(query);
+    }
+
     @Get()
     @ApiBearerAuth('access-token')
     @UseGuards(AuthGuardConfig)
@@ -35,10 +42,24 @@ export class BaseController<T extends Document> {
         return this.baseService.update(id, updateDto);
     }
 
+    @Patch('update-by-query')
+    @ApiBearerAuth('access-token')
+    @UseGuards(AuthGuardConfig)
+    updateByQuery(@Body() body: { filter: any; updateDto: Partial<T> }) {
+        return this.baseService.updateByQuery(body.filter, body.updateDto);
+    }
+
     @Delete(':id')
     @ApiBearerAuth('access-token')
     @UseGuards(AuthGuardConfig)
     remove(@Param('id') id: string) {
         return this.baseService.remove(id);
+    }
+
+    @Delete('remove-by-query')
+    @ApiBearerAuth('access-token')
+    @UseGuards(AuthGuardConfig)
+    removeByQuery(@Body() filter: any) {
+        return this.baseService.removeByQuery(filter);
     }
 }
