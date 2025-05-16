@@ -22,11 +22,39 @@ export class BaseController<T extends Document> {
         return this.baseService.create(createDto);
     }
 
-    @Post('create-by-query')
+    @Post('create-many')
     @ApiBearerAuth('access-token')
     @UseGuards(AuthGuardConfig)
-    createByQuery(@Body() query: Partial<T>) {
-        return this.baseService.createByQuery(query);
+    createMany(@Body() createDtos: Partial<T>[]) {
+        return this.baseService.createMany(createDtos);
+    }
+
+    @Get()
+    @ApiBearerAuth('access-token')
+    @UseGuards(AuthGuardConfig)
+    findAll() {
+        return this.baseService.findAll();
+    }
+
+    @Post('find-many')
+    @ApiBearerAuth('access-token')
+    @UseGuards(AuthGuardConfig)
+    findMany(@Body() query: any) {
+        return this.baseService.findMany(query);
+    }
+
+    @Post('find-one')
+    @ApiBearerAuth('access-token')
+    @UseGuards(AuthGuardConfig)
+    findOne(@Body() query: any) {
+        return this.baseService.findOne(query);
+    }
+
+    @Get('find-by-id/:id')
+    @ApiBearerAuth('access-token')
+    @UseGuards(AuthGuardConfig)
+    findById(@Param('id') id: string) {
+        return this.baseService.findById(id);
     }
 
     @Post('paginate')
@@ -43,52 +71,71 @@ export class BaseController<T extends Document> {
             required: ['page', 'limit'],
         },
     })
-    async findPaginated(
-        @Body() body: { query?: Partial<T>; page: number; limit: number }
-    ) {
+    findPaginated(@Body() body: { query?: any; page: number; limit: number }) {
         const { query, page, limit } = body;
         return this.baseService.findPaginated(query || {}, page, limit);
     }
 
-    @Get()
+    @Patch('update-by-id/:id')
     @ApiBearerAuth('access-token')
     @UseGuards(AuthGuardConfig)
-    findAll() {
-        return this.baseService.findAll();
+    updateById(@Param('id') id: string, @Body() updateDto: Partial<T>) {
+        return this.baseService.updateById(id, updateDto);
     }
 
-    @Get(':id')
+    @Patch('update-many')
     @ApiBearerAuth('access-token')
     @UseGuards(AuthGuardConfig)
-    findOne(@Param('id') id: string) {
-        return this.baseService.findOne(id);
+    updateMany(@Body() body: { filter: any; updateDto: Partial<T> }) {
+        return this.baseService.updateMany(body.filter, body.updateDto);
     }
 
-    @Patch(':id')
+    @Patch('update-one')
     @ApiBearerAuth('access-token')
     @UseGuards(AuthGuardConfig)
-    update(@Param('id') id: string, @Body() updateDto: Partial<T>) {
-        return this.baseService.update(id, updateDto);
+    updateOne(@Body() body: { filter: any; updateDto: Partial<T> }) {
+        return this.baseService.updateOne(body.filter, body.updateDto);
     }
 
-    @Patch('update-by-query')
+    @Delete('delete-by-id/:id')
     @ApiBearerAuth('access-token')
     @UseGuards(AuthGuardConfig)
-    updateByQuery(@Body() body: { filter: any; updateDto: Partial<T> }) {
-        return this.baseService.updateByQuery(body.filter, body.updateDto);
+    deleteById(@Param('id') id: string) {
+        return this.baseService.deletById(id);
     }
 
-    @Delete(':id')
+    @Delete('delete-many')
     @ApiBearerAuth('access-token')
     @UseGuards(AuthGuardConfig)
-    remove(@Param('id') id: string) {
-        return this.baseService.remove(id);
+    deleteMany(@Body() filter: any) {
+        return this.baseService.deletMultiple(filter);
     }
 
-    @Delete('remove-by-query')
+    @Delete('delete-one')
     @ApiBearerAuth('access-token')
     @UseGuards(AuthGuardConfig)
-    removeByQuery(@Body() filter: any) {
-        return this.baseService.removeByQuery(filter);
+    deleteOne(@Body() filter: any) {
+        return this.baseService.deletOne(filter);
+    }
+
+    @Post('count')
+    @ApiBearerAuth('access-token')
+    @UseGuards(AuthGuardConfig)
+    count(@Body() filter: any) {
+        return this.baseService.count(filter);
+    }
+
+    @Post('aggregate')
+    @ApiBearerAuth('access-token')
+    @UseGuards(AuthGuardConfig)
+    aggregate(@Body() pipeline: any[]) {
+        return this.baseService.aggregate(pipeline);
+    }
+
+    @Post('distinct')
+    @ApiBearerAuth('access-token')
+    @UseGuards(AuthGuardConfig)
+    distinct(@Body() body: { field: string; filter?: any }) {
+        return this.baseService.distinct(body.field, body.filter);
     }
 }

@@ -18,17 +18,17 @@ export class ToolService {
     }
 
     getCurrentRoom(roomId: string) {
-        return [];
+        return this.registryService.findMany({
+            id: roomId,
+        });
     }
 
     getHistory(id: string, start: number, end: number) {
         const startTime = new Date(Number(start));
         const endTime = new Date(Number(end));
-        return this.registryService
-            .findByQuery({
-                id: id.replace(/:/g, ''),
-                startTime: { $gt: startTime, $lt: endTime },
-            })
-            .exec();
+        return this.registryService.findMany({
+            id: id.replace(/:/g, ''),
+            startTime: { $gt: startTime, $lt: endTime },
+        });
     }
 }
