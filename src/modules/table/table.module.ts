@@ -12,6 +12,6 @@ import { JwtConfig } from '@configs/jwt.config';
     ],
     controllers: [TableController],
     providers: [TableService],
-    exports: [],
+    exports: [TableService],
 })
 export class TableModule {}

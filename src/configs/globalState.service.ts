@@ -4,6 +4,7 @@ import { Injectable } from '@nestjs/common';
 export class GlobalStateService {
     private currentOperations: any = {};
     private tagmap: any = {};
+    private sessions: any = {};
 
     get(key: string, room: string) {
         if (!this[key]) this[key] = {};
