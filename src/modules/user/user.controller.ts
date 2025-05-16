@@ -10,7 +10,7 @@ import { BaseController } from '@base/base.controller';
 import { UserDocument } from './schemas/user.schema';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { FindByEmailDto } from './dto/findByEmail.dto';
-import Joi from 'joi';
+import * as Joi from 'joi';
 import { AuthGuardConfig } from '@configs/guard.config';
 
 @ApiTags('User')

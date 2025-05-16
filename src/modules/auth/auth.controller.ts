@@ -4,12 +4,6 @@ import * as Joi from 'joi';
 import { LoginUserDto } from './dto/login-user.dto';
 import { ApiBody, ApiOperation } from '@nestjs/swagger';
 import { CreateUserDto } from '../../dtoContants/register-user.dto';
-import { UserDocument } from '@modules/user/schemas/user.schema';
-
-const LoginSchema = Joi.object({
-    email: Joi.string().email().required(),
-    password: Joi.string().required(),
-});
 
 @Controller('auth')
 export class AuthController {
@@ -32,6 +26,10 @@ export class AuthController {
     @ApiOperation({ summary: 'Login' })
     @ApiBody({ type: LoginUserDto })
     async login(@Body() body: LoginUserDto) {
+        const LoginSchema = Joi.object({
+            email: Joi.string().email().required(),
+            password: Joi.string().required(),
+        });
         const { error } = LoginSchema.validate(body);
         if (error) throw error;
         return this.authService.login(body.email, body.password);
