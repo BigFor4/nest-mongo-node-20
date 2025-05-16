@@ -12,6 +12,6 @@ import { JwtConfig } from '@configs/jwt.config';
     ],
     controllers: [MetaController],
     providers: [MetaService],
-    exports: [],
+    exports: [MetaService],
 })
 export class MetaModule {}

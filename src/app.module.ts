@@ -8,6 +8,7 @@ import { TableModule } from '@modules/table/table.module';
 import { RegistryModule } from '@modules/registry/registry.module';
 import { MetaModule } from '@modules/meta/meta.module';
 import { PersonModule } from '@modules/person/person.module';
+import { ToolModule } from '@modules/tool/tool.module';
 
 @Module({
     imports: [
@@ -25,6 +26,7 @@ import { PersonModule } from '@modules/person/person.module';
         }),
         DatabaseModule,
         AuthModule,
+        ToolModule,
         UserModule,
         TableModule,
         RegistryModule,

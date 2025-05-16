@@ -14,6 +14,6 @@ import { JwtConfig } from '@configs/jwt.config';
     ],
     controllers: [RegistryController],
     providers: [RegistryService],
-    exports: [],
+    exports: [RegistryService],
 })
 export class RegistryModule {}

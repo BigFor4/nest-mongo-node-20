@@ -12,4 +12,16 @@ export class TableService extends BaseService<TableDocument> {
     ) {
         super(tableModel);
     }
+
+    async findAll(): Promise<any> {
+        const tables = await this.tableModel.find().lean();
+        const result = {};
+        tables.map((table) => {
+            const { room, uuid } = table;
+            result[room] = result[room] || {};
+            result[room][uuid] = result[room][uuid] || {};
+            result[room][uuid] = table;
+        });
+        return result;
+    }
 }

@@ -14,6 +14,6 @@ import { JwtConfig } from '@configs/jwt.config';
     ],
     controllers: [PersonController],
     providers: [PersonService],
-    exports: [],
+    exports: [PersonService],
 })
 export class PersonModule {}

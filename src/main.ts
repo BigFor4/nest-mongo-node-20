@@ -31,7 +31,7 @@ async function bootstrap() {
         new AllExceptionsFilter(httpAdapterHost)
     );
 
-    app.setGlobalPrefix('api');
+    app.setGlobalPrefix('');
     app.useGlobalInterceptors(new ResponseTransformInterceptor());
     app.useGlobalPipes(
         new ValidationPipe({
