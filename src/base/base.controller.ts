@@ -108,7 +108,7 @@ export class BaseController<T extends Document> {
     @ApiBearerAuth('access-token')
     @UseGuards(AuthGuardConfig)
     deleteMany(@Body() filter: any) {
-        return this.baseService.deletMultiple(filter);
+        return this.baseService.deleteMany(filter);
     }
 
     @Delete('delete-one')

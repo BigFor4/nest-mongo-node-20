@@ -87,7 +87,7 @@ export class BaseService<T extends Document> {
         return true;
     }
 
-    async deletMultiple(filter: any): Promise<number> {
+    async deleteMany(filter: any): Promise<number> {
         const result = await this.model.deleteMany(filter).exec();
         if (result.deletedCount === 0)
             throw new NotFoundException('No items matched the query');

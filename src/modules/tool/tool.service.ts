@@ -133,7 +133,7 @@ export class ToolService {
     }
 
     async delete(query: any) {
-        return this.registryService.deletMultiple(query);
+        return this.registryService.deleteMany(query);
     }
 
     zebra(payload: {
@@ -319,5 +319,11 @@ export class ToolService {
         const httpMsg = { payload: { status } };
 
         return [tcpMsg, httpMsg, guiMsg, dbMsg];
+    }
+
+    async delTable(uuid: string) {
+        const query = { uuid };
+        const result = await this.tableService.deleteMany(query);
+        return result;
     }
 }
