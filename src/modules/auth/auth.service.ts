@@ -63,7 +63,7 @@ export class AuthService {
     async loginWithAuthId(authId: string) {
         const authUser: any = await this.validateAuthIdWithAuth0(authId);
         if (!authUser) {
-            await this.userService.removeByQuery({ email: authId });
+            await this.userService.deletOne({ email: authId });
             throw new UnauthorizedException('Invalid Auth0 user');
         }
 
