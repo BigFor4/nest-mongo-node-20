@@ -104,12 +104,4 @@ export class BaseService<T extends Document> {
     async count(filter: any = {}): Promise<number> {
         return this.model.countDocuments(filter).exec();
     }
-
-    async aggregate(pipeline: any[]): Promise<any[]> {
-        return this.model.aggregate(pipeline).exec();
-    }
-
-    async distinct(field: string, filter: any = {}): Promise<any[]> {
-        return this.model.distinct(field, filter).exec();
-    }
 }

@@ -124,18 +124,4 @@ export class BaseController<T extends Document> {
     count(@Body() filter: any) {
         return this.baseService.count(filter);
     }
-
-    @Post('aggregate')
-    @ApiBearerAuth('access-token')
-    @UseGuards(AuthGuardConfig)
-    aggregate(@Body() pipeline: any[]) {
-        return this.baseService.aggregate(pipeline);
-    }
-
-    @Post('distinct')
-    @ApiBearerAuth('access-token')
-    @UseGuards(AuthGuardConfig)
-    distinct(@Body() body: { field: string; filter?: any }) {
-        return this.baseService.distinct(body.field, body.filter);
-    }
 }
